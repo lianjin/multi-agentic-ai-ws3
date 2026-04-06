@@ -40,7 +40,6 @@ def execute_tool(tool_name):
     Returns Tool output as string
     """
     tool_name = tool_name.lower().strip()
-
     if tool_name == "time":
         return singapore_time()
     elif tool_name == "weather":

@@ -24,10 +24,7 @@ def orchestrator(state):
 
     if volley_left <= 0:
         debug("No volleys left, returning to human", "ORCHESTRATOR")
-        return {
-            "next_speaker": "human",
-            "volley_msg_left": 0
-        }
+        return {"next_speaker": "human", "volley_msg_left": 0}
 
     messages = state.get("messages", [])
 
@@ -38,7 +35,7 @@ def orchestrator(state):
         for role_id, role_name in [
             ("field_dispatcher", "Field Dispatcher"),
             ("traffic_controller", "Traffic Controller"),
-            ("safety_analyst", "Safety Analyst")
+            ("safety_analyst", "Safety Analyst"),
         ]:
             if name == role_name:
                 last_role = role_id
@@ -54,10 +51,10 @@ def orchestrator(state):
         next_index = (current_index + 1) % len(RESPONSE_SEQUENCE)
         selected_speaker = RESPONSE_SEQUENCE[next_index]
 
-    debug(f"Sequential selection: {selected_speaker} (volley {volley_left} -> {volley_left - 1})", "ORCHESTRATOR")
+    debug(
+        f"Sequential selection: {selected_speaker} (volley {volley_left} -> {volley_left - 1})",
+        "ORCHESTRATOR",
+    )
 
     # Return only the updates (LangGraph will merge with existing state)
-    return {
-        "next_speaker": selected_speaker,
-        "volley_msg_left": volley_left - 1
-    }
+    return {"next_speaker": selected_speaker, "volley_msg_left": volley_left - 1}
