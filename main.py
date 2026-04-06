@@ -24,18 +24,43 @@ def build_graph():
 
     builder = StateGraph(State)
 
-    # TODO: Connect the graph
+    # Add nodes
+    builder.add_node("human", human_node)
+    builder.add_node("orchestrator", orchestrator)
+    builder.add_node("participant", participant_node)
+    builder.add_node("summarizer", summarizer_node)
+
+    # Entry point
+    builder.add_edge(START, "human")
+
+    # After human input, check for exit or continue
+    builder.add_conditional_edges("human", check_exit_condition, {
+        "summarizer": "summarizer",
+        "orchestrator": "orchestrator"
+    })
+
+    # After orchestrator, route to participant or back to human
+    builder.add_conditional_edges("orchestrator", orchestrator_routing, {
+        "participant": "participant",
+        "human": "human"
+    })
+
+    # After participant speaks, return to orchestrator for next turn
+    builder.add_edge("participant", "orchestrator")
+
+    # Summarizer ends the graph
+    builder.add_edge("summarizer", END)
 
     return builder.compile()
 
 
 def main():
-    print("=== SINGAPORE KOPITIAM CHATTER ===")
-    print("Chat with our kopitiam regulars! Type 'exit' to end.\n")
-    print("Setting: A bustling Singapore kopitiam on a typical afternoon...")
-    print("The regulars are here - Uncle Ah Seng at his drinks stall,")
-    print("Mei Qi with her phone, Bala checking football scores,")
-    print("and Dr. Tan sipping his kopi-o.\n")
+    print("=== SMART CITY EMERGENCY RESPONSE TEAM ===")
+    print("Report an incident to engage the response team. Type 'exit' to close the session.\n")
+    print("Team on standby:")
+    print("  - Field Dispatcher: real-time data acquisition and incident prioritization")
+    print("  - Traffic Controller: road condition analysis and response planning")
+    print("  - Safety Analyst: final assessment and recommendations\n")
 
     graph = build_graph()
 
@@ -50,10 +75,10 @@ def main():
     try:
         graph.invoke(initial_state)
     except KeyboardInterrupt:
-        print("\n\nConversation interrupted. Goodbye!")
+        print("\n\nSession interrupted. Stay safe!")
     except Exception as e:
         print(f"\nAn error occurred: {e}")
-        print("Ending conversation...")
+        print("Ending session...")
 
 
 if __name__ == "__main__":

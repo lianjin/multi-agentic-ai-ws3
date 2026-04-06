@@ -1,5 +1,5 @@
 """
-Agents module for Singapore Kopitiam project.
+Agents module for Singapore Smart City Emergency Response project.
 """
 
 from .orchestrator import orchestrator
