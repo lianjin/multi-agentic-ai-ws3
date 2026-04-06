@@ -1,21 +1,21 @@
 from langchain_openai import ChatOpenAI
-from langchain.schema import HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 
 
 def summarizer(state) -> str:
     """
-    Generate summary report using LLM when conversation ends.
+    Generate final assessment report using LLM when session ends.
 
     Args:
         state: Current conversation state with messages
 
     Returns:
-        Formatted summary string
+        Formatted assessment report string
     """
     messages = state.get("messages", [])
 
     if not messages:
-        return "No conversation to summarize."
+        return "No incident data to summarize."
 
     # Extract conversation text
     conversation_text = ""
@@ -24,34 +24,34 @@ def summarizer(state) -> str:
         conversation_text += f"{msg.get('content', '')}\n"
 
     if not conversation_text.strip():
-        return "No conversation content to summarize."
+        return "No incident content to summarize."
 
     # System prompt for summarization
-    system_prompt = """You are a keen observer at a Singapore kopitiam who has been listening to the conversation.
+    system_prompt = """You are the reporting system for the Smart City Emergency Response Team.
 
-Generate a concise summary of the conversation that captures:
-1. Key topics discussed
-2. The dynamics between participants
-3. Any memorable quotes or highlights
-4. The overall mood and flow of the conversation
+Generate a concise final assessment report that captures:
+1. Incident summary and current status
+2. Key findings from the Field Dispatcher (traffic data and priority)
+3. Road condition analysis and response plan from the Traffic Controller
+4. Final safety assessment and recommendations from the Safety Analyst
+5. Overall risk level and suggested next actions
 
-Format your summary in a clear, engaging way that captures the essence of kopitiam banter.
-Keep it concise but insightful."""
+Format your report in a clear, structured way suitable for an emergency operations log.
+Keep it professional and actionable."""
 
-    user_prompt = f"""Here's the conversation that took place:
+    user_prompt = f"""Here is the emergency response team session:
 
 {conversation_text}
 
-Please provide a summary of this kopitiam conversation."""
+Please provide the final assessment report for this incident."""
 
     try:
         # Call LLM
-        llm = ChatOpenAI(model="gpt-5-nano", temperature=1)
+        llm = ChatOpenAI(model="gpt-4o-mini", temperature=1)
 
-        response = llm.invoke([
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=user_prompt)
-        ])
+        response = llm.invoke(
+            [SystemMessage(content=system_prompt), HumanMessage(content=user_prompt)]
+        )
 
         if isinstance(response.content, list):
             summary = " ".join(str(item) for item in response.content).strip()
@@ -59,13 +59,13 @@ Please provide a summary of this kopitiam conversation."""
             summary = str(response.content).strip()
 
         # Format with header
-        return f"=== KOPITIAM CONVERSATION SUMMARY ===\n\n{summary}"
+        return f"=== SMART CITY EMERGENCY RESPONSE — FINAL ASSESSMENT REPORT ===\n\n{summary}"
 
     except Exception as e:
         # Fallback to basic summary if LLM fails
-        return f"""=== KOPITIAM CONVERSATION SUMMARY ===
+        return f"""=== SMART CITY EMERGENCY RESPONSE — FINAL ASSESSMENT REPORT ===
 
 Total messages: {len(messages)}
 
-Unable to generate detailed summary at this time.
-The conversation has been logged for review."""
+Unable to generate detailed report at this time.
+The session has been logged for review."""

@@ -10,10 +10,14 @@ def human_node(state: State) -> dict:
     user_input = input("\nYou: ").strip()
 
     human_message = {
-        # TODO: Define message
+        "role": "user",
+        "content": f"User: {user_input}"
     }
 
-    # TODO: Return
+    return {
+        "messages": [human_message],
+        "volley_msg_left": 3
+    }
 
 
 def check_exit_condition(state: State) -> Literal["summarizer", "orchestrator"]:
@@ -37,14 +41,16 @@ def orchestrator_routing(state: State) -> Literal["participant", "human"]:
     """
     volley_left = state.get("volley_msg_left", 0)
 
-    # TODO: Return based on condition
+    if volley_left > 0:
+        return "participant"
+    return "human"
 
 
 def participant_node(state: State) -> dict:
     """
     Participant node - calls the appropriate participant and handles output.
     """
-    next_speaker = state.get("next_speaker", "ah_seng")  # Default fallback
+    next_speaker = state.get("next_speaker", "field_dispatcher")  # Default fallback
 
     # Call participant with the selected speaker
     result = participant(next_speaker, state)
@@ -60,13 +66,13 @@ def participant_node(state: State) -> dict:
 
 def summarizer_node(state: State) -> dict:
     """
-    Summarizer node - generates and displays conversation summary.
+    Summarizer node - generates and displays final assessment report.
     """
-    print("\n=== CONVERSATION ENDING ===\n")
+    print("\n=== EMERGENCY RESPONSE SESSION ENDING ===\n")
 
     # Generate and print summary
     summary = summarizer(state)
     print(summary)
-    print("\nThank you! Come back to kopitiam anytime lah!")
+    print("\nThank you. Stay safe and remain vigilant.")
 
     return {}  # Empty update to end
