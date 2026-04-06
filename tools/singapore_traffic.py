@@ -15,7 +15,7 @@ def singapore_traffic() -> str:
     Requires LTA_DATAMALL_KEY to be set in environment variables.
     """
 
-    # 从环境变量获取 API Key
+    # read API_KEY from environment variable
     api_key = os.environ.get("LTA_DATAMALL_KEY")
 
     if not api_key:
@@ -34,14 +34,11 @@ def singapore_traffic() -> str:
             if not incidents:
                 return "Current Traffic Status: All roads are clear. No major incidents reported."
 
-            # 格式化输出结果
             result = "Real-time Traffic Incidents in Singapore:\n"
 
-            # 为了避免 Agent 接收过长信息，通常取前 5-8 条最重要的信息
-            # 每条数据包含 Type (事故/施工等) 和 Message (具体地点和描述)
+            # to avoid overwhelming the output, we will limit to the first 8 incidents and indicate if there are more
             for i, incident in enumerate(incidents[:8], 1):
                 msg = incident.get("Message", "No description available")
-                # LTA 的 Message 通常形如 "(12/5)18:30 Accident on PIE (towards Changi)..."
                 result += f"{i}. {msg}\n"
 
             if len(incidents) > 8:
