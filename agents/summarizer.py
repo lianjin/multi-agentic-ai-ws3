@@ -47,12 +47,11 @@ Please provide the final assessment report for this incident."""
 
     try:
         # Call LLM
-        llm = ChatOpenAI(model="gpt-5-nano", temperature=1)
+        llm = ChatOpenAI(model="gpt-4o-mini", temperature=1)
 
-        response = llm.invoke([
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=user_prompt)
-        ])
+        response = llm.invoke(
+            [SystemMessage(content=system_prompt), HumanMessage(content=user_prompt)]
+        )
 
         if isinstance(response.content, list):
             summary = " ".join(str(item) for item in response.content).strip()

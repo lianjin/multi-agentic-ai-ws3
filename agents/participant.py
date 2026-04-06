@@ -13,7 +13,7 @@ PERSONAS = {
         "backstory": "Experienced emergency dispatcher responsible for obtaining real-time data and determining incident priority",
         "personality": "Decisive, methodical, calm under pressure, data-driven",
         "speech_style": "Clear and concise professional language, uses operational terminology, focuses on facts and urgency",
-        "tools": ["traffic"]
+        "tools": ["traffic"],
     },
     "traffic_controller": {
         "name": "Traffic Controller",
@@ -21,7 +21,7 @@ PERSONAS = {
         "backstory": "Senior traffic management specialist responsible for analyzing road conditions and formulating response plans",
         "personality": "Analytical, systematic, proactive, expert in traffic flow and road management",
         "speech_style": "Structured professional language, uses traffic management terminology, presents clear action plans",
-        "tools": ["weather"]
+        "tools": ["weather"],
     },
     "safety_analyst": {
         "name": "Safety Analyst",
@@ -29,8 +29,8 @@ PERSONAS = {
         "backstory": "Chief safety analyst responsible for synthesizing all field information and producing the final comprehensive assessment report",
         "personality": "Thorough, precise, big-picture thinker, expert at synthesizing complex information",
         "speech_style": "Formal report-style language, structured and comprehensive, highlights risks and recommendations",
-        "tools": ["time"]
-    }
+        "tools": ["time"],
+    },
 }
 
 
@@ -63,7 +63,11 @@ def participant(persona_id, state) -> dict:
         Dict with message updates for state
     """
     if persona_id not in PERSONAS:
-        return {"messages": [{"role": "assistant", "content": f"Unknown role: {persona_id}"}]}
+        return {
+            "messages": [
+                {"role": "assistant", "content": f"Unknown role: {persona_id}"}
+            ]
+        }
 
     persona = PERSONAS[persona_id]
     debug(f"\n=== {persona['name']} is analyzing... ===")
@@ -78,12 +82,12 @@ def participant(persona_id, state) -> dict:
     tool_descriptions = {
         "time": "Returns current time in Singapore",
         "weather": "Returns current weather conditions in Singapore",
-        "traffic": "Returns real-time traffic incidents in Singapore"
+        "traffic": "Returns real-time traffic incidents in Singapore",
     }
 
     # Build available actions list based on role's tools
     available_actions = ""
-    for tool in persona['tools']:
+    for tool in persona["tools"]:
         available_actions += f"\n\n{tool}:\n{tool_descriptions[tool]}"
 
     # System prompt for ReAct
@@ -138,18 +142,20 @@ IMPORTANT:
         debug(f"Iteration {iteration + 1}/{max_iterations}")
 
         try:
-            llm = ChatOpenAI(model="gpt-5-mini", temperature=1)
-            response = llm.invoke([
-                SystemMessage(content=system_prompt),
-                HumanMessage(content=user_prompt)
-            ])
+            llm = ChatOpenAI(model="gpt-4o-mini", temperature=1)
+            response = llm.invoke(
+                [
+                    SystemMessage(content=system_prompt),
+                    HumanMessage(content=user_prompt),
+                ]
+            )
             content = response.content.strip()
             debug(f"LLM Response:\n{content}\n")
 
             # Check if the response contains Message:
             if "Message:" in content:
                 # Extract the message
-                message_match = re.search(r'Message:\s*(.*)', content, re.DOTALL)
+                message_match = re.search(r"Message:\s*(.*)", content, re.DOTALL)
                 if message_match:
                     final_message = message_match.group(1).strip()
                     debug(f"Final Message: {final_message}")
@@ -157,17 +163,19 @@ IMPORTANT:
 
                     # Return the message to state
                     return {
-                        "messages": [{
-                            "role": "assistant",
-                            "name": persona['name'],
-                            "content": f"\n[{persona['name']}]: {final_message}\n\n"
-                        }]
+                        "messages": [
+                            {
+                                "role": "assistant",
+                                "name": persona["name"],
+                                "content": f"\n[{persona['name']}]: {final_message}\n\n",
+                            }
+                        ]
                     }
 
             # Check if the response contains Action:
             if "Action:" in content:
                 # Extract the action
-                action_match = re.search(r'Action:\s*(\w+)', content)
+                action_match = re.search(r"Action:\s*(\w+)", content)
                 if action_match:
                     tool_name = action_match.group(1)
                     debug(f"Executing tool: {tool_name}")
@@ -185,20 +193,25 @@ IMPORTANT:
             internal_context += f"\n{content}\n"
 
         except Exception as e:
+            print(f"Error during LLM processing: {e}")
             # Fallback response if LLM fails
             return {
-                "messages": [{
-                    "role": "assistant",
-                    "name": persona['name'],
-                    "content": f"[{persona['name']}]: Unable to retrieve data at this time. Awaiting reconnection."
-                }]
+                "messages": [
+                    {
+                        "role": "assistant",
+                        "name": persona["name"],
+                        "content": f"[{persona['name']}]: Unable to retrieve data at this time. Awaiting reconnection.",
+                    }
+                ]
             }
 
     # If we exhausted iterations without getting a Message, provide default
     return {
-        "messages": [{
-            "role": "assistant",
-            "name": persona['name'],
-            "content": f"[{persona['name']}]: Assessment pending — awaiting additional data."
-        }]
+        "messages": [
+            {
+                "role": "assistant",
+                "name": persona["name"],
+                "content": f"[{persona['name']}]: Assessment pending — awaiting additional data.",
+            }
+        ]
     }
